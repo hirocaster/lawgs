@@ -49,7 +49,7 @@ function CloudWatchLogger(logGroupName) {
 
 	var uploadQueuedLogs = function(logs) {
 		_log(logGroupName, '>> uploadQueuedLogs triggered with ', logs.length, ' logs');
-		
+
 		var createLogGroup = Q(true);
 		if(!logGroupExists) {
 			createLogGroup = _createLogGroupIfDoesntExist(logGroupName)
@@ -111,7 +111,7 @@ function CloudWatchLogger(logGroupName) {
 	// Public API
 	this.config = function(conf) {
 		extend(this, conf);
-		
+
 		if(conf.settings) {
 			settings = conf.settings;
 		}
@@ -122,14 +122,18 @@ function CloudWatchLogger(logGroupName) {
 	};
 
 	this.log = function(type, obj) {
-		obj = { 
-			message: typeof obj === 'string' ? obj : JSON.stringify(obj), 
-			timestamp: new Date().getTime(), 
-			type: type 
+		obj = {
+			message: typeof obj === 'string' ? obj : JSON.stringify(obj),
+			timestamp: new Date().getTime(),
+			type: type
 		};
 
 		logsSource.onNext(obj);
 	};
+
+    this.close = function() {
+      logsSource.onCompleted();
+    };
 
 	/* Log group functions */
 	function _createLogGroupIfDoesntExist(name) {
@@ -152,7 +156,7 @@ function CloudWatchLogger(logGroupName) {
 			else		deferred.resolve(data.logGroups.length > 0);
 		});
 
-		return deferred.promise.timeout(settings.aws.timeout 
+		return deferred.promise.timeout(settings.aws.timeout
 			|| DEFAULT_TIMEOUT, 'Could not communicate with AWS CloudWatch in a timely fashion');
 	}
 
@@ -165,7 +169,7 @@ function CloudWatchLogger(logGroupName) {
 			else		deferred.resolve(name);
 		});
 
-		return deferred.promise.timeout(settings.aws.timeout 
+		return deferred.promise.timeout(settings.aws.timeout
 			|| DEFAULT_TIMEOUT, 'Could not create log group in a timely fashion');
 	}
 
@@ -191,7 +195,7 @@ function CloudWatchLogger(logGroupName) {
 			else		deferred.resolve(data.logStreams.length > 0);
 		});
 
-		return deferred.promise.timeout(settings.aws.timeout 
+		return deferred.promise.timeout(settings.aws.timeout
 			|| DEFAULT_TIMEOUT, 'Could not communicate with AWS in a timely fashion');
 	}
 
@@ -204,7 +208,7 @@ function CloudWatchLogger(logGroupName) {
 			else		deferred.resolve(name);
 		});
 
-		return deferred.promise.timeout(settings.aws.timeout 
+		return deferred.promise.timeout(settings.aws.timeout
 			|| DEFAULT_TIMEOUT, 'Could not create log stream in a timely fashion');
 	}
 
@@ -237,7 +241,7 @@ function CloudWatchLogger(logGroupName) {
 			else deferred.resolve(data);
 		});
 
-		return deferred.promise.timeout(settings.aws.timeout 
+		return deferred.promise.timeout(settings.aws.timeout
 			|| DEFAULT_TIMEOUT, 'Could not communicate with AWS in a timely fashion');
 	}
 
